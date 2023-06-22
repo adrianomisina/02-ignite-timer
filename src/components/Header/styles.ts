@@ -21,6 +21,10 @@ export const HeaderContainer = styled.header`
     border-bottom: 3px solid transparent;
     transition: all 0.2s;
 
+    &:focus {
+      box-shadow: none;
+    }
+
     &:hover {
       border-bottom: 3px solid ${(props) => props.theme['green-500']};
     }
