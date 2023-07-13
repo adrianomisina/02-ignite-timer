@@ -31,12 +31,20 @@ interface CyclesContextProviderProps {
   children: ReactNode
 }
 
+interface CyclesState {
+  cycles: Cycle[]
+  activeCycleId: string | null
+}
+
 export const CyclesContextProvider = ({
   children,
 }: CyclesContextProviderProps) => {
-  const [cycles, dispatch] = useReducer((state: Cycle[], action: any) => {
+  const [cycles, dispatch] = useReducer((state: CyclesState, action: any) => {
     if (action.type === 'ADD_NEW_CYCLE') {
-      return [...state, action.payload.newCycle]
+      return {
+        ...state,
+        cycles: [...state.cycles, action.payload.newCycle]
+      }
     }
     return state
   }, [])
