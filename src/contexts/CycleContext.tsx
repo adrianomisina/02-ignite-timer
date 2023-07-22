@@ -8,8 +8,8 @@ import {
 import {
   addNewCycleAction,
   interruptCurrentCycleAction,
+  markCurrentCycleAsFinishedAction,
 } from '../reducers/cycles/actions'
-
 import { Cycle, cycleReducer } from '../reducers/cycles/reducer'
 import { differenceInSeconds } from 'date-fns'
 
@@ -17,6 +17,7 @@ interface CreateCycleData {
   task: string
   minutesAmount: number
 }
+
 interface CyclesContextType {
   cycles: Cycle[]
   activeCycle: Cycle | undefined
@@ -28,7 +29,16 @@ interface CyclesContextType {
   interruptCurrentCycle: () => void
 }
 
-export const CyclesContext = createContext({} as CyclesContextType)
+export const CyclesContext = createContext<CyclesContextType>({
+  cycles: [],
+  activeCycle: undefined,
+  activeCycleId: null,
+  amountSecondsPassed: 0,
+  markCurrentCycleAsFinished: () => {},
+  setSecondsPassed: () => {},
+  createNewCycle: () => {},
+  interruptCurrentCycle: () => {},
+})
 
 interface CyclesContextProviderProps {
   children: ReactNode
@@ -52,20 +62,21 @@ export const CyclesContextProvider = ({
         return JSON.parse(storedStateAsJSON)
       }
 
-      return {
-        initialState,
-      }
+      return initialState
     },
   )
 
   const { cycles, activeCycleId } = cycleState
-  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+  // Find the active cycle if it exists, otherwise set activeCycle to undefined
+  const activeCycle = activeCycleId
+    ? cycles.find((cycle) => cycle.id === activeCycleId)
+    : undefined
 
   const [amountSecondsPassed, setAmountSecondsPassed] = useState(() => {
     if (activeCycle) {
       return differenceInSeconds(new Date(), new Date(activeCycle.startData))
     }
-
     return 0
   })
 
@@ -76,10 +87,6 @@ export const CyclesContextProvider = ({
 
   const setSecondsPassed = (seconds: number) => {
     setAmountSecondsPassed(seconds)
-  }
-
-  const markCurrentCycleAsFinished = () => {
-    dispatch(markCurrentCycleAsFinished())
   }
 
   const createNewCycle = (data: CreateCycleData) => {
@@ -95,6 +102,10 @@ export const CyclesContextProvider = ({
     dispatch(addNewCycleAction(newCycle))
 
     setAmountSecondsPassed(0)
+  }
+
+  const markCurrentCycleAsFinished = () => {
+    dispatch(markCurrentCycleAsFinishedAction())
   }
 
   const interruptCurrentCycle = () => {
