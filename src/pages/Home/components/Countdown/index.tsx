@@ -20,7 +20,7 @@ const Countdown = () => {
       interval = setInterval(() => {
         const secondsDifference = differenceInSeconds(
           new Date(),
-          activeCycle.startData,
+          new Date(activeCycle.startData),
         )
 
         if (secondsDifference >= totalSeconds) {
